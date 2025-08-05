@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    {% load static %}
+<head>
+    <title>Mis Reservaciones</title>
+</head>
+<body>
+
+    <!-- Encabezado de sesión -->
+    {% if user.is_authenticated %}
+        <p>Hola, {{ user.username }} |
+            <a href="{% url 'logout' %}">Cerrar sesión</a> |
+            <a href="{% url 'lista_salones' %}">Ver salones</a>
+        </p>
+    {% endif %}
+
+    <h1>Mis Reservaciones</h1>
+
+    <ul>
+        {% for reservacion in reservaciones %}
+            <li>
+                <strong>{{ reservacion.salon.nombre }}</strong><br>
+                Desde: {{ reservacion.fecha_inicio }}<br>
+                Hasta: {{ reservacion.fecha_fin }}<br>
+                Estado: {{ reservacion.estado }}
+            </li>
+        {% empty %}
+            <li>No tienes reservaciones registradas.</li>
+        {% endfor %}
+    </ul>
+
+</body>
+</html>
