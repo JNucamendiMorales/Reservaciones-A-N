@@ -1,0 +1,66 @@
+{% extends 'theme/base.html' %}
+{% load humanize %}
+
+{% block title %}{{ salon.nombre }} - Detalle{% endblock %}
+
+{% block content %}
+<!-- Tarjeta principal con imagen y datos -->
+<div class="max-w-4xl mx-auto p-6 bg-white rounded shadow mt-8 flex flex-col md:flex-row gap-6">
+
+  <!-- Imagen -->
+  <div class="flex-shrink-0 w-full md:w-1/2">
+    {% if salon.imagen %}
+      <img src="{{ salon.imagen.url }}" alt="{{ salon.nombre }}" class="w-full h-auto max-h-80 object-cover rounded">
+    {% else %}
+      <div class="w-full h-80 bg-gray-200 flex items-center justify-center rounded">
+        <span class="text-gray-500">No hay imagen disponible</span>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Datos -->
+  <div class="flex-grow w-full md:w-1/2 flex flex-col justify-between">
+    <h1 class="text-3xl font-bold mb-4">{{ salon.nombre }}</h1>
+    <p class="mb-2"><strong>Precio:</strong> ${{ salon.precio|intcomma }}</p>
+    <p class="mb-2"><strong>Calificación:</strong> ⭐ {{ salon.calificacion }}</p>
+    <p class="mb-2"><strong>Categoría:</strong> <em>{{ salon.categoria }}</em></p>
+    <p class="mb-2"><strong>Ciudad:</strong> {{ salon.ciudad }}</p>
+    <p class="mb-4"><strong>Capacidad:</strong> {{ salon.capacidad }} personas</p>
+
+    <form action="{% url 'reservar_salon' salon.id %}" method="post" class="mt-6">
+      {% csrf_token %}
+      <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-full font-semibold transition w-full">
+        Reservar este salón
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Descripción -->
+<div class="max-w-4xl mx-auto mt-12 p-6 bg-white rounded shadow">
+  <h2 class="text-xl font-semibold mb-4">Descripción</h2>
+  <p>{{ salon.descripcion }}</p>
+</div>
+
+<!-- Reseñas -->
+<div class="max-w-4xl mx-auto mt-12 p-6 bg-white rounded shadow">
+  <h2 class="text-xl font-semibold mb-6">Reseñas de usuarios</h2>
+
+  {% if reseñas %}
+    <ul class="space-y-6">
+      {% for review in reseñas %}
+        <li class="border border-gray-200 rounded p-4">
+          <p class="font-semibold">{{ review.usuario }}</p>
+          <p class="text-yellow-500">⭐ {{ review.calificacion }}</p>
+          <p class="text-gray-700 mt-1">{{ review.comentario }}</p>
+          {% if review.fecha %}
+            <p class="text-sm text-gray-400 mt-2">{{ review.fecha|date:"d M Y" }}</p>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-gray-500 italic">Aún no hay reseñas para este salón.</p>
+  {% endif %}
+</div>
+{% endblock %}

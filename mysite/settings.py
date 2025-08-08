@@ -41,13 +41,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
+    "rest_framework",
     "myapp",
     "tailwind",
     "myapp.theme",
     "django_browser_reload",
+    
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -62,7 +69,9 @@ ROOT_URLCONF = 'mysite.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR / 'myapp/templates'
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -83,11 +92,14 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'reservaciones_chilaquil',
-        'USER': 'django_user',
-        'PASSWORD': 'tupassword',
+        'NAME': 'reservacionesdb',
+        'USER': 'nuca',
+        'PASSWORD': 'nuca123',
         'HOST': 'localhost',
         'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        }
     }
 }
 
@@ -126,12 +138,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 
 
 STATICFILES_DIRS = [
-    BASE_DIR / 'myapp' / 'static',
+    BASE_DIR / 'myapp/theme/static',
+    BASE_DIR / 'myapp/static',
 ]
 
 # Default primary key field type
@@ -155,3 +168,16 @@ MIDDLEWARE += ['django_browser_reload.middleware.BrowserReloadMiddleware']
 
 #This is where the npm direcotry is located
 NPM_BIN_PATH = "T:/npm.cmd"
+
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+}

@@ -1,34 +1,53 @@
-{% load static %}
+<!-- templates/base.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>{% block title %}Reservaciones A&N{% endblock %}</title>
-  <link rel="stylesheet" href="{% static 'css/dist/styles.css' %}">
-  <link rel="stylesheet" href="{% static 'myapp/main.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Sistema de Reservaciones{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 text-gray-900" style="height: 100vh; overflow: hidden;">
+<body class="bg-gray-50 text-gray-900">
 
-  <!-- Header con botones amarillos a la derecha -->
-  <header class="bg-white shadow p-4 flex justify-between items-center">
-    <h1 class="text-2xl font-bold text-blue-600">Reservaciones A&N</h1>
-    <div>
-      {% if user.is_authenticated %}
-        <span class="text-gray-700 mr-4">Hola, {{ user.username }}</span>
-        <a href="{% url 'logout' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded mr-2">Cerrar sesión</a>
-        <a href="{% url 'crear_reservacion' %}" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded mr-2">Reservar</a>
-        <a href="{% url 'mis_reservaciones' %}" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">Mis reservaciones</a>
-      {% else %}
-        <a href="{% url 'login' %}" class="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-2 px-4 rounded mr-2">Iniciar sesión</a>
-        <a href="{% url 'registro' %}" class="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-2 px-4 rounded">Registrarse</a>
-      {% endif %}
+  <!-- NAVBAR -->
+  <nav class="bg-white shadow-md py-4 px-6 sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto flex justify-between items-center">
+    
+    <!-- Logo o título con enlace hacia inicio.html -->
+    <a href="{% url 'inicio' %}" class="text-xl font-bold text-indigo-600 hover:text-indigo-800 transition">
+  Reservaciones A&N
+</a>
+
+    <!-- Categorías -->
+    <div class="hidden md:flex gap-4">
+      <a href="{% url 'filtrar_categoria' 'Reuniones' %}" class="text-gray-700 hover:text-indigo-600 font-medium transition">
+        Reuniones
+      </a>
+      <a href="{% url 'filtrar_categoria' 'Expos' %}" class="text-gray-700 hover:text-indigo-600 font-medium transition">
+        Expos
+      </a>
+      <a href="{% url 'filtrar_categoria' 'Fiestas' %}" class="text-gray-700 hover:text-indigo-600 font-medium transition">
+        Fiestas
+      </a>
     </div>
-  </header>
 
-  <!-- Contenido dinámico -->
-  <main class="p-6">
-    {% block content %}{% endblock %}
+    <!-- Sesión -->
+    <div class="flex gap-2">
+      <a href="{% url 'login' %}" class="text-sm font-medium text-indigo-600 border border-indigo-600 px-4 py-2 rounded-full hover:bg-indigo-600 hover:text-white transition">
+        Iniciar sesión
+      </a>
+      <a href="{% url 'registro' %}" class="text-sm font-medium text-white bg-indigo-600 px-4 py-2 rounded-full hover:bg-indigo-700 transition">
+        Registrarse
+      </a>
+    </div>
+  </div>
+</nav>
+
+<main>
+    {% block content %}
+    {% endblock %}
   </main>
+
 
 </body>
 </html>
