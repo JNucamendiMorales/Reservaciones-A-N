@@ -1,0 +1,246 @@
+{% extends "theme/base.html" %}
+
+{% block content %}
+<style>
+  /* Fondo uniforme y centrado */
+  body {
+    background-color: #f8f9fa;
+  }
+  .reserva-container {
+    max-width: 900px;
+    margin: 20px auto 40px auto; /* Debajo navbar */
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    display: flex;
+    padding: 30px;
+    gap: 40px;
+  }
+  .imagen-salon {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .imagen-salon h3 {
+    margin-bottom: 15px;
+    font-weight: 600;
+    font-size: 1.4rem;
+    color: #333;
+  }
+  .imagen-salon img {
+    width: 100%;
+    max-width: 350px;
+    border-radius: 10px;
+    object-fit: cover;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  }
+  .btn-reservar {
+    margin-top: 20px;
+    padding: 12px 30px;
+    font-size: 1.15rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+  }
+  .btn-reservar:disabled {
+    background-color: #9ac7ff;
+    cursor: not-allowed;
+  }
+
+  .calendario-container {
+    flex: 1;
+    max-width: 450px;
+  }
+  #calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  #calendar-header button {
+    font-size: 1.3rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: #007bff;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+  }
+  #calendar-header button:hover {
+    background-color: #e2e6ea;
+  }
+  #month-year {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #333;
+  }
+  #calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    font-weight: 600;
+    color: #555;
+    text-align: center;
+  }
+  #calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+  }
+  #calendar-days div {
+    padding: 10px 0;
+    text-align: center;
+    border-radius: 7px;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+  #calendar-days div.unavailable {
+    background-color: #f0f0f0;
+    color: #bbb;
+    cursor: default;
+  }
+  #calendar-days div.selected {
+    background-color: #004a99;
+    color: white;
+  }
+  #calendar-days div:hover:not(.unavailable):not(.selected) {
+    background-color: #d0e7ff;
+  }
+</style>
+
+<div class="reserva-container">
+  <div class="imagen-salon">
+    <h3>Salón: {{ salon.nombre }}</h3>
+    {% if salon.imagen %}
+      <img src="{{ salon.imagen.url }}" alt="Imagen {{ salon.nombre }}">
+    {% else %}
+      <img src="https://via.placeholder.com/350x220?text=Sin+imagen" alt="Sin imagen disponible">
+    {% endif %}
+    <button id="btn-reservar" class="btn-reservar" disabled>Reservar</button>
+  </div>
+
+  <div class="calendario-container">
+    <div id="calendar-header">
+      <button id="btn-prev">&#8592;</button>
+      <h3 id="month-year"></h3>
+      <button id="btn-next">&#8594;</button>
+    </div>
+
+    <div id="calendar-weekdays">
+      <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
+    </div>
+
+    <div id="calendar-days"></div>
+  </div>
+</div>
+
+<script>
+  const fechasReservadas = JSON.parse('{{ fechas_reservadas|escapejs }}');
+  const calendarDays = document.getElementById('calendar-days');
+  const monthYear = document.getElementById('month-year');
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  const btnReservar = document.getElementById('btn-reservar');
+
+  let selectedDate = null;
+  let currentDate = new Date();
+
+  function renderCalendar(date) {
+    calendarDays.innerHTML = '';
+    const year = date.getFullYear();
+    const month = date.getMonth();
+
+    const months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    monthYear.textContent = `${months[month]} ${year}`;
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    // Agregar espacios vacíos para alinear el primer día
+    for(let i = 0; i < firstDay.getDay(); i++){
+      const emptyCell = document.createElement('div');
+      calendarDays.appendChild(emptyCell);
+    }
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    for(let day = 1; day <= lastDay.getDate(); day++){
+      const dayCell = document.createElement('div');
+      dayCell.textContent = day;
+
+      const cellDate = new Date(year, month, day);
+      const cellDateStr = cellDate.toISOString().slice(0,10);
+
+      if(cellDate < today || fechasReservadas.includes(cellDateStr)){
+        dayCell.classList.add('unavailable');
+        dayCell.style.cursor = 'default';
+      } else {
+        dayCell.addEventListener('click', () => {
+          clearSelection();
+          dayCell.classList.add('selected');
+          selectedDate = cellDate;
+          btnReservar.disabled = false;
+        });
+        dayCell.addEventListener('mouseover', () => {
+          if(!dayCell.classList.contains('selected')) dayCell.style.backgroundColor = '#d0e7ff';
+        });
+        dayCell.addEventListener('mouseout', () => {
+          if(!dayCell.classList.contains('selected')) dayCell.style.backgroundColor = '';
+        });
+      }
+      calendarDays.appendChild(dayCell);
+    }
+  }
+
+  function clearSelection(){
+    Array.from(calendarDays.children).forEach(child => {
+      child.classList.remove('selected');
+      child.style.backgroundColor = '';
+    });
+    btnReservar.disabled = true;
+    selectedDate = null;
+  }
+
+  btnPrev.addEventListener('click', () => {
+  const today = new Date();
+  // Sólo permite retroceder si el mes actual es menor que el mes mostrado
+  if(currentDate.getFullYear() > today.getFullYear() || 
+    (currentDate.getFullYear() === today.getFullYear() && currentDate.getMonth() > today.getMonth())) {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar(currentDate);
+    clearSelection();
+  }
+});
+
+btnNext.addEventListener('click', () => {
+  currentDate.setMonth(currentDate.getMonth() + 1);
+  renderCalendar(currentDate);
+  clearSelection();
+});
+
+btnReservar.addEventListener('click', () => {
+  if (!selectedDate) return alert('Selecciona una fecha para reservar');
+
+  const fechaISO = selectedDate.toISOString().slice(0, 10);
+
+  // Redirige a la vista resumen, pasando la fecha seleccionada
+  window.location.href = `/salon/{{ salon.id }}/resumen/${fechaISO}/`;
+
+});
+
+
+  // Render inicial
+  renderCalendar(currentDate);
+</script>
+
+{% endblock %}

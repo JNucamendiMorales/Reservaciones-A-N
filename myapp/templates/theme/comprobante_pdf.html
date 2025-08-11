@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Comprobante de Reserva</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; }
+    h1 { color: #2c7a7b; }
+    p { font-size: 14px; }
+    .detalle { margin-top: 20px; }
+    .detalle strong { display: inline-block; width: 150px; }
+  </style>
+</head>
+<body>
+  <h1>Comprobante de Reserva</h1>
+  <p><strong>Usuario:</strong> {{ reserva.usuario.username }}</p>
+  <p><strong>Salón:</strong> {{ reserva.salon.nombre }}</p>
+  <p><strong>Fecha de reserva:</strong> {{ reserva.fecha_reserva|date:"d M Y" }}</p>
+  <p><strong>Estado:</strong> {{ reserva.estado }}</p>
+  <p><strong>Pagada:</strong> {{ reserva.pagada|yesno:"Sí,No" }}</p>
+
+  <div class="detalle">
+    <p><strong>Precio total:</strong> ${{ reserva.precio_total|floatformat:2 }}</p>
+  </div>
+
+  <p>Gracias por reservar con Reservaciones A&amp;N.</p>
+</body>
+</html>

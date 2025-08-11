@@ -47,8 +47,8 @@ urlpatterns = [
     path('', include('myapp.urls')),
 
     # Rutas de autenticación
-    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('login/', auth_views.LoginView.as_view(template_name='theme/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(next_page="inicio"), name='logout'),
     path('registro/', reservaciones_views.registro, name='registro'),
     path('api/', include(router.urls)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

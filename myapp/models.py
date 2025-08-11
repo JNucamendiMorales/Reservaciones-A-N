@@ -1,4 +1,5 @@
 from django.db import models
+from decimal import Decimal
 from django.contrib.auth.models import User
 
 
@@ -28,10 +29,17 @@ class Salon(models.Model):
 class Reservacion(models.Model):
     salon = models.ForeignKey(Salon, on_delete=models.CASCADE)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
-    fecha_inicio = models.DateTimeField()
-    fecha_fin = models.DateTimeField()
+    fecha_reserva = models.DateField()
     estado = models.CharField(max_length=20, default='pendiente')
+    pagada = models.BooleanField(default=False)
+    precio_total = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+
+
+    class Meta:
+        unique_together = ('salon', 'fecha_reserva')
 
     def __str__(self):
-        return f"{self.usuario.username} - {self.salon.nombre}"
+        return f"{self.usuario.username} - {self.salon.nombre} ({self.fecha_reserva})"
+
+
 

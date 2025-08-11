@@ -1,0 +1,36 @@
+{% extends "theme/base.html" %}
+
+{% load humanize %}
+
+{% block title %}Confirmación de Pago{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto mt-16 p-8 bg-white rounded shadow-md text-center">
+  <h1 class="text-4xl font-bold text-green-600 mb-4">✅ ¡Pago exitoso!</h1>
+  <p class="text-lg mb-6">Gracias por tu compra en <strong>Reservaciones A&amp;N</strong>.</p>
+
+  <div class="bg-green-50 p-6 rounded border border-green-200 mb-8 text-left">
+    <h2 class="text-2xl font-semibold mb-3">Detalles de tu reserva</h2>
+    <p><strong>Salón:</strong> {{ reserva.salon.nombre }}</p>
+    <p><strong>Fecha de reserva:</strong> {{ reserva.fecha_reserva|date:"d M Y" }}</p>
+    <p><strong>Total pagado:</strong> ${{ total_final|intcomma }} MXN</p>
+
+    {% if descuento_aplicado and descuento_aplicado != "0" %}
+      <p class="text-green-700 mt-2">Descuento aplicado: ${{ descuento_aplicado|floatformat:2|intcomma }} MXN (Código: {{ codigo_ingresado|upper }})</p>
+    {% endif %}
+  </div>
+
+  <div class="flex justify-center gap-4">
+    <a href="{% url 'home' %}" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded font-semibold transition">
+      Volver al inicio
+    </a>
+    
+    <a href="{% url 'descargar_comprobante' reserva.id %}" 
+       class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded font-semibold transition"
+       target="_blank" 
+       rel="noopener noreferrer">
+      Descargar comprobante PDF
+    </a>
+  </div>
+</div>
+{% endblock %}

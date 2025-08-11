@@ -22,10 +22,32 @@ urlpatterns = [
     path('categoria/<str:categoria>/', filtrar_categoria, name='filtrar_categoria'),
 
     #Reservar salon
-    path('salon/<int:salon_id>/reservar/', reservar_salon, name='reservar_salon'),
+    path('salon/<int:salon_id>/reservar/', views.reservar_salon, name='reservar_salon'),
+    path('salon/<int:salon_id>/crear_reserva/', views.crear_reserva, name='crear_reserva'),
 
     #Registro de usuario
     path('registro/', registro, name='registro'),
+
+    #Inspeccionar perfil
+    path('perfil/', views.mi_perfil, name='mi_perfil'),
+
+    #Resumen de reserva
+    path('salon/<int:salon_id>/resumen/<fecha>/', views.resumen_reserva, name='resumen_salon_fecha'),
+
+    #Pagos
+    path('pago/<int:reserva_id>/', views.vista_pago, name='vista_pago'),
+    path('procesar_pago/', views.procesar_pago, name='procesar_pago'),
+
+    path('confirmacion/<int:reserva_id>/', views.confirmacion_pago, name='confirmacion_pago'),
+
+    #resumen
+    path('resumen/reserva/<int:reserva_id>/', views.resumen_reserva, name='resumen_reserva'),
+    path('resumen/<int:salon_id>/<str:fecha>/', views.resumen_reserva, name='resumen_salon_fecha_2'),
+
+    #Descargar PDF
+    path('comprobante/<int:reserva_id>/', views.descargar_comprobante, name='descargar_comprobante'),
+
+
 
     # Rutas de la API REST
     path('', include(router.urls)),

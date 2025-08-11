@@ -19,8 +19,15 @@ class RegistroForm(UserCreationForm):
 class ReservacionForm(forms.ModelForm):
     class Meta:
         model = Reservacion
-        fields = ['salon', 'fecha_inicio', 'fecha_fin']
+        fields = ['salon', 'fecha_reserva']  
         widgets = {
-            'fecha_inicio': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-            'fecha_fin': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'fecha_reserva': forms.DateInput(
+                attrs={
+                    'type': 'date',
+                    'id': 'fecha_reserva',
+                    'autocomplete': 'off',
+                    'class': 'w-full border border-gray-300 rounded-md px-3 py-2',
+                    'placeholder': 'Selecciona la fecha de la reserva'
+                }
+            )
         }
