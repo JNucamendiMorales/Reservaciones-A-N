@@ -1,0 +1,4 @@
+# Ignorar variables de entorno y entornos virtuales
+.env
+venv/
+venv_nuevo/

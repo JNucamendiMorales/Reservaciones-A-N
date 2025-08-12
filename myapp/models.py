@@ -40,6 +40,18 @@ class Reservacion(models.Model):
 
     def __str__(self):
         return f"{self.usuario.username} - {self.salon.nombre} ({self.fecha_reserva})"
+    
+
+
+class Favorito(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    salon = models.ForeignKey(Salon, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('usuario', 'salon')
+
+    def __str__(self):
+        return f"{self.usuario.username} - {self.salon.nombre}"
 
 
 

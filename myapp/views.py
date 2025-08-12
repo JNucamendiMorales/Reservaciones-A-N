@@ -1,7 +1,8 @@
 import json
-from .models import Salon,Reservacion,Reservacion
+from .models import Salon,Reservacion,Reservacion,Favorito
 from django.shortcuts import get_object_or_404, render,redirect
-from django.http import JsonResponse
+from django.http import JsonResponse,HttpResponse
+#from django.template.loader import render_to_string
 from django.utils.dateparse import parse_datetime
 from django.db.models import Q
 from django.utils.safestring import mark_safe
@@ -10,13 +11,17 @@ from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.urls import reverse
 from .serializers import SalonSerializer, ReservacionSerializer
 from rest_framework import viewsets
 from datetime import datetime,timedelta
 from .forms import RegistroForm,ReservacionForm
 from decimal import Decimal
-from weasyprint import HTML
+#from weasyprint import HTML
+#from xhtml2pdf import pisa
+#from reportlab.pdfgen import canvas
+#from reportlab.lib.pagesizes import letter
 
 # Create your views here.
 
@@ -46,11 +51,77 @@ def filtrar_categoria(request, categoria):
     }
     return render(request, 'theme/salones_categoria.html', context)
 
+#filtrar salones en el navbar
+def filtrar_salon(request):
+    salones = Salon.objects.all()
+
+    ciudad = request.GET.get('ciudad')
+    capacidad = request.GET.get('capacidad')
+    categoria = request.GET.get('categoria')
+    precio = request.GET.get('precio')
+    calificacion = request.GET.get('calificacion')
+
+    if ciudad:
+        salones = salones.filter(ciudad__iexact=ciudad)
+
+    if capacidad:
+        # Filtramos salones con capacidad >= valor seleccionado
+        try:
+            capacidad_int = int(capacidad)
+            salones = salones.filter(capacidad__gte=capacidad_int)
+        except ValueError:
+            pass
+
+    if categoria:
+        salones = salones.filter(categoria__iexact=categoria)
+
+    if precio:
+        # Precio viene como "min-max" o "min+"
+        if '+' in precio:
+            try:
+                min_precio = int(precio.replace('+', ''))
+                salones = salones.filter(precio__gte=min_precio)
+            except ValueError:
+                pass
+        else:
+            try:
+                rango = precio.split('-')
+                min_precio = int(rango[0])
+                max_precio = int(rango[1])
+                salones = salones.filter(precio__gte=min_precio, precio__lte=max_precio)
+            except (ValueError, IndexError):
+                pass
+
+    if calificacion:
+        try:
+            calificacion_int = int(calificacion)
+            salones = salones.filter(calificacion__gte=calificacion_int)
+        except ValueError:
+            pass
+
+    contexto = {
+        'salones': salones,
+        'filtros': {
+            'ciudad': ciudad,
+            'capacidad': capacidad,
+            'categoria': categoria,
+            'precio': precio,
+            'calificacion': calificacion,
+        }
+    }
+    return render(request, 'theme/listar_salones.html', contexto)
+
+
+
+
 #detalle_salon.html-----------------------------------------------------
 
 def detalle_salon(request, salon_id):
     salon = get_object_or_404(Salon, id=salon_id)
-    return render(request, 'theme/salon_detalle.html', {'salon': salon})
+    favorito = None
+    if request.user.is_authenticated:
+        favorito = Favorito.objects.filter(usuario=request.user, salon=salon).exists()
+    return render(request, 'theme/salon_detalle.html', {'salon': salon, 'favorito': favorito})
 
 
 #Hacer registro-------------------------------------------------------------------------------
@@ -228,7 +299,7 @@ def procesar_pago(request):
     return redirect('vista_pago', reserva_id=reserva.id)
 
 
-#Mi perfil--------------------------------------------------------------------
+#Mi perfil-----------------------------------------------------------------------------------------------------------------------
 from django.shortcuts import render
 
 @login_required
@@ -263,7 +334,7 @@ def resumen_reserva(request, salon_id, fecha):
             descuento_aplicado = round(precio_original * 0.10, 2)
             total_final = round(precio_original - descuento_aplicado, 2)
 
-    # Guardar precio total actualizado en la reserva
+    # Guardar precio total actualizado en la reserva--------------------------------------------------------------------------------------
     reserva.precio_total = total_final
     reserva.save()
 
@@ -280,7 +351,7 @@ def resumen_reserva(request, salon_id, fecha):
     return render(request, 'theme/pago.html', contexto)
 
 
-#Confirmacion del pago
+#Confirmacion del pago---------------------------------------------------------------------------------------------------------------------
 @login_required
 def confirmacion_pago(request, reserva_id):
     reserva = get_object_or_404(Reservacion, id=reserva_id)
@@ -289,9 +360,9 @@ def confirmacion_pago(request, reserva_id):
     if not reserva.pagada:
         return redirect('vista_pago', reserva_id=reserva_id)
 
-    total_final = request.session.pop('total_final', None)
-    descuento_aplicado = request.session.pop('descuento_aplicado', None)
-    codigo_ingresado = request.session.pop('codigo_ingresado', '')
+    total_final = request.session.get('total_final', None)
+    descuento_aplicado = request.session.get('descuento_aplicado', None)
+    codigo_ingresado = request.session.get('codigo_ingresado', '')
 
     contexto = {
         'reserva': reserva,
@@ -300,6 +371,46 @@ def confirmacion_pago(request, reserva_id):
         'codigo_ingresado': codigo_ingresado,
     }
     return render(request, 'theme/confirmacion_pago.html', contexto)
+
+
+#listado de mis reservas------------------------------------------------------------------------------------------------------------------
+
+@login_required
+def mis_reservaciones(request):
+    reservaciones = Reservacion.objects.filter(usuario=request.user).order_by('-fecha_reserva')
+    return render(request, 'theme/mis_reservaciones.html', {'reservaciones': reservaciones})
+
+
+#listado de mis favoritos--------------------------------------------------------------------------------------------------------------------
+
+@login_required
+def mis_favoritos(request):
+    favoritos = Favorito.objects.filter(usuario=request.user).select_related('salon')
+    context = {
+        'favoritos': favoritos,
+    }
+    return render(request, 'theme/mis_favoritos.html', context)
+
+#boton de desactivar/activar favorito------------------------------------------------------------------------------------------------------------
+@login_required
+@require_POST
+def toggle_favorito(request, salon_id):
+    salon = get_object_or_404(Salon, id=salon_id)
+    usuario = request.user
+
+    favorito, created = Favorito.objects.get_or_create(usuario=usuario, salon=salon)
+    if not created:
+        favorito.delete()
+        estado = "eliminado"
+    else:
+        estado = "agregado"
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({"success": True, "estado": estado})
+    else:
+        return JsonResponse({"success": False, "error": "Solo AJAX permitido"})
+
+
 
 
 
@@ -322,29 +433,6 @@ def crear_reservacion(request):
         form = ReservacionForm()
 
     return render(request, 'reservaciones/crear_reservacion.html', {'form': form})
-
-@login_required
-def mis_reservaciones(request):
-    reservaciones = Reservacion.objects.filter(usuario=request.user)
-    return render(request, 'reservaciones/mis_reservaciones.html', {'reservaciones': reservaciones})
-
-
-#Descargar PDF
-@login_required
-def descargar_comprobante(request, reserva_id):
-    reserva = get_object_or_404(Reservacion, id=reserva_id)
-    
-    # Puedes pasar más datos si quieres (total, descuentos, usuario, etc)
-    html_string = render_to_string('theme/comprobante_pdf.html', {'reserva': reserva})
-
-    html = HTML(string=html_string)
-    pdf = html.write_pdf()
-
-    response = HttpResponse(pdf, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename=comprobante_reserva_{reserva.id}.pdf'
-    return response
-
-
 
 
 

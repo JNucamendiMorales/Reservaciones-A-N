@@ -19,6 +19,14 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+from dotenv import load_dotenv
+
+# Carga variables del archivo .env
+env_path = Path(__file__).resolve().parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
+
+
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -89,19 +97,22 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+import os
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'reservacionesdb',
-        'USER': 'nuca',
-        'PASSWORD': 'nuca123',
-        'HOST': 'localhost',
+        'NAME': os.getenv('DB_NAME', 'reservacionesdb'),
+        'USER': os.getenv('DB_USER', 'nuca'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'nuca123'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
         'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         }
     }
 }
+
 
 
 # Password validation

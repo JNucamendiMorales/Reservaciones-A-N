@@ -13,13 +13,23 @@ urlpatterns = [
     path('home/', views.home_view, name='home'),  # After login
     path('lista-salones/', views.lista_salones, name='lista_salones'),
     path('reservar/', views.crear_reservacion, name='crear_reservacion'),
-    path('mis-reservaciones/', views.mis_reservaciones, name='mis_reservaciones'),
     
+    #menu desplegable de perfil
+    path('mis-reservaciones/', views.mis_reservaciones, name='mis_reservaciones'),
+    path('mis-favoritos/', views.mis_favoritos, name='mis_favoritos'),
+
+    #boton de toggle favorito
+    path('favorito/toggle/<int:salon_id>/', views.toggle_favorito, name='toggle_favorito'),
+
     #Ver detalles del salon
     path('salon/<int:salon_id>/', detalle_salon, name='detalle_salon'),
 
     # Filtrar categorias (navbar)
     path('categoria/<str:categoria>/', filtrar_categoria, name='filtrar_categoria'),
+
+    #Filtrar salones (navbar)
+    path('filtrar/', views.filtrar_salon, name='filtrar_salon'),
+
 
     #Reservar salon
     path('salon/<int:salon_id>/reservar/', views.reservar_salon, name='reservar_salon'),
@@ -45,7 +55,9 @@ urlpatterns = [
     path('resumen/<int:salon_id>/<str:fecha>/', views.resumen_reserva, name='resumen_salon_fecha_2'),
 
     #Descargar PDF
-    path('comprobante/<int:reserva_id>/', views.descargar_comprobante, name='descargar_comprobante'),
+    #path('reserva/<int:reserva_id>/comprobante/', views.descargar_comprobante_pdf, name='descargar_comprobante_pdf'),
+
+    #path('comprobante/<int:reserva_id>/', views.descargar_comprobante, name='descargar_comprobante'),
 
 
 
