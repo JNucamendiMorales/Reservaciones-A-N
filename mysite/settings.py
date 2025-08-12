@@ -106,7 +106,7 @@ DATABASES = {
         'USER': os.getenv('DB_USER', 'nuca'),
         'PASSWORD': os.getenv('DB_PASSWORD', 'nuca123'),
         'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': '3306',
+        'PORT': os.getenv('DB_PORT', '3306'),
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         }

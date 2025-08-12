@@ -1,0 +1,34 @@
+# Ignorar entornos virtuales
+venv/
+venv_nuevo/
+
+# Ignorar archivos de sistema
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# Archivos de logs
+*.log
+
+# Archivos y carpetas de Git
+.git
+.gitignore
+
+# Archivos de configuración de VS Code
+.vscode/
+
+# Archivos de node_modules (los instalas dentro del contenedor)
+node_modules/
+
+# Archivos de build o producción local (por ejemplo si generas build de React)
+dist/
+build/
+
+# Archivos de entorno (variables sensibles)
+.env
+
+# Archivos de Docker y docker-compose no se ignoran si quieres usarlos
+# Pero si quieres, puedes agregar:
+# Dockerfile
+# docker-compose.yml

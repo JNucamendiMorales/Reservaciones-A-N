@@ -410,6 +410,18 @@ def toggle_favorito(request, salon_id):
     else:
         return JsonResponse({"success": False, "error": "Solo AJAX permitido"})
 
+#Elimnar reservacion---------------------------------------------------------------------------------------------
+@login_required
+def eliminar_reservacion(request, reserva_id):
+    reserva = get_object_or_404(Reservacion, id=reserva_id, usuario=request.user)
+    
+    if request.method == 'POST':
+        reserva.delete()
+        messages.success(request, "Reservación eliminada correctamente.")
+        return redirect('mis_reservaciones')
+
+    # Si quieres puedes mostrar una página de confirmación aquí, pero con el confirm JS en el botón basta.
+    return redirect('mis_reservaciones')
 
 
 

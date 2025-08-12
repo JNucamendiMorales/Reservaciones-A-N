@@ -35,6 +35,9 @@ urlpatterns = [
     path('salon/<int:salon_id>/reservar/', views.reservar_salon, name='reservar_salon'),
     path('salon/<int:salon_id>/crear_reserva/', views.crear_reserva, name='crear_reserva'),
 
+    #En mis reservas (elimnar una reservacion)
+    path('reservacion/eliminar/<int:reserva_id>/', views.eliminar_reservacion, name='eliminar_reservacion'),
+
     #Registro de usuario
     path('registro/', registro, name='registro'),
 

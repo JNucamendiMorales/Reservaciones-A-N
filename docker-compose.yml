@@ -5,10 +5,10 @@ services:
     image: mariadb:10.6
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: tu_root_password
-      MYSQL_DATABASE: tu_basedatos
-      MYSQL_USER: tu_usuario
-      MYSQL_PASSWORD: tu_password
+      MYSQL_ROOT_PASSWORD: nuca123           # usa tu contraseña real
+      MYSQL_DATABASE: reservacionesdb        # nombre de la base que usas
+      MYSQL_USER: nuca                       # usuario real
+      MYSQL_PASSWORD: nuca123                 # contraseña real
     ports:
       - "3306:3306"
     volumes:
@@ -27,9 +27,9 @@ services:
       - db
     environment:
       - DB_HOST=db
-      - DB_NAME=tu_basedatos
-      - DB_USER=tu_usuario
-      - DB_PASSWORD=tu_password
+      - DB_NAME=reservacionesdb
+      - DB_USER=nuca
+      - DB_PASSWORD=nuca123
 
   frontend:
     build:

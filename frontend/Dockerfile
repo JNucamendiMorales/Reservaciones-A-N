@@ -1,12 +1,14 @@
-# Dockerfile (frontend React + Vite)
 FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package*.json /app/
+# Copia solo package.json y package-lock.json primero para instalar dependencias (cacheo eficiente)
+COPY package.json package-lock.json* ./
+
 RUN npm install
 
-COPY . /app/
+# Copia el resto del código después
+COPY . .
 
 EXPOSE 5173
 
