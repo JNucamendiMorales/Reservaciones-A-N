@@ -143,29 +143,40 @@
 
 <div class="container">
   <!-- Left summary panel -->
+  <div class="container">
+  <!-- Left summary panel -->
   <div class="left-panel">
     <h2>Reservaciones A&N</h2>
-    <div class="price-big">${{ total|intcomma }}<span style="font-weight: 400; font-size: 1rem;">MXN por día</span></div>
-    <div class="line-item">
-      <span>Renta del salón</span>
-      <span>${{ total|intcomma }} <span style="font-size: 0.6em;">MXN</span></span>
-    </div>
+    
+    <!-- Precio original por día -->
+<div class="price-big">
+  ${{ precio_original_por_dia|intcomma }}
+  <span style="font-weight: 400; font-size: 1rem;">MXN por día</span>
+</div>
 
-    {% if descuento_aplicado > 0 %}
-    <div class="line-item" style="color: #4caf50;">
-      <span>Descuento ({{ codigo_ingresado|upper }})</span>
-      <span>- ${{ descuento_aplicado|intcomma }} MXN</span>
-    </div>
-    <div class="line-item total">
-      <span>Total a pagar</span>
-      <span>${{ total_final|intcomma }} MXN</span>
-    </div>
-    {% else %}
-    <div class="line-item total">
-      <span>Total a pagar</span>
-      <span>${{ total|intcomma }} MXN</span>
-    </div>
-    {% endif %}
+<!-- Precio total sin descuento -->
+<div class="line-item">
+  <span>Renta del salón</span>
+  <span>${{ total_original|intcomma }} <span style="font-size: 0.6em;">MXN</span></span>
+</div>
+
+{% if descuento_aplicado > 0 %}
+  <div class="line-item" style="color: #4caf50;">
+    <span>Descuento ({{ codigo_ingresado|upper }})</span>
+    <span>- ${{ descuento_aplicado|intcomma }} MXN</span>
+  </div>
+
+  <div class="line-item total">
+    <span>Total a pagar</span>
+    <span>${{ total_final|intcomma }} MXN</span>
+  </div>
+{% else %}
+  <div class="line-item total">
+    <span>Total a pagar</span>
+    <span>${{ total_original|intcomma }} MXN</span>
+  </div>
+{% endif %}
+
   </div>
 
   <!-- Right form panel -->

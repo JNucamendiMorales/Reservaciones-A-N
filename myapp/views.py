@@ -229,10 +229,10 @@ def crear_reserva(request, salon_id):
 @login_required
 def vista_pago(request, reserva_id):
     reserva = get_object_or_404(Reservacion, id=reserva_id)
-    print(f"Reserva ID en vista_pago: {reserva.id}")  # Debug para ver si llega bien
-    salon = reserva.salon  # obtener el salón relacionado
+    salon = reserva.salon
 
-    total_original = Decimal(reserva.precio_total)
+    # Si reserva tiene precio_total lo usamos, si no usamos precio del salón
+    total_original = Decimal(reserva.precio_total) if reserva.precio_total else Decimal(salon.precio)
     codigo_ingresado = ''
     descuento_aplicado = Decimal('0')
     total_final = total_original
@@ -240,9 +240,10 @@ def vista_pago(request, reserva_id):
     context = {
         "reserva": reserva,
         "salon": salon,
+        "precio_original_por_dia": salon.precio,
         "total_original": total_original,
-        "total": total_original,
-        "total_final":total_final,
+        "total": total_original,       # total sin descuento
+        "total_final": total_final,    # total con descuento (igual al original acá)
         "codigo_ingresado": codigo_ingresado,
         "descuento_aplicado": descuento_aplicado,
     }
@@ -260,21 +261,27 @@ def procesar_pago(request):
         return redirect('home')
 
     reserva = get_object_or_404(Reservacion, id=reserva_id)
-    total_original = reserva.precio_total if reserva.precio_total else reserva.salon.precio
+    salon = reserva.salon
+
+    total_original = Decimal(reserva.precio_total) if reserva.precio_total else Decimal(salon.precio)
 
     codigo = request.POST.get("codigo_descuento", "").strip()
     aplicar_descuento = request.POST.get("aplicar_descuento")
     realizar_pago = request.POST.get("realizar_pago")
 
     descuento_aplicado = Decimal('0')
-    total = Decimal(str(total_original))
+    total = total_original
 
     if aplicar_descuento:
         if codigo.lower() == "pongame10":
             descuento_aplicado = total * Decimal('0.10')
             total = total - descuento_aplicado
+
         context = {
             "reserva": reserva,
+            "salon": salon,
+            "precio_original_por_dia": salon.precio,
+            "total_original": total_original,
             "total": total,
             "total_final": total,
             "descuento_aplicado": descuento_aplicado,
@@ -323,18 +330,18 @@ def resumen_reserva(request, salon_id, fecha):
         }
     )
 
-    precio_original = float(salon.precio)
-    descuento_aplicado = 0.0
+    precio_original = Decimal(salon.precio)
+    descuento_aplicado = Decimal('0')
     total_final = precio_original
     codigo_ingresado = ''
 
     if request.method == "POST" and 'codigo_descuento' in request.POST:
         codigo_ingresado = request.POST.get('codigo_descuento', '').strip()
         if codigo_ingresado.lower() == 'pongame10':
-            descuento_aplicado = round(precio_original * 0.10, 2)
-            total_final = round(precio_original - descuento_aplicado, 2)
+            descuento_aplicado = (precio_original * Decimal('0.10')).quantize(Decimal('0.01'))
+            total_final = (precio_original - descuento_aplicado).quantize(Decimal('0.01'))
 
-    # Guardar precio total actualizado en la reserva--------------------------------------------------------------------------------------
+    # Guardar precio total actualizado en la reserva
     reserva.precio_total = total_final
     reserva.save()
 
@@ -342,14 +349,14 @@ def resumen_reserva(request, salon_id, fecha):
         'reserva': reserva,
         'salon': salon,
         'fecha_reserva': fecha_reserva,
+        'precio_original_por_dia': precio_original,
         'total_original': precio_original,
-        "total":total_final,
+        "total": total_final,
         'descuento_aplicado': descuento_aplicado,
         'total_final': total_final,
         'codigo_ingresado': codigo_ingresado,
     }
     return render(request, 'theme/pago.html', contexto)
-
 
 #Confirmacion del pago---------------------------------------------------------------------------------------------------------------------
 @login_required

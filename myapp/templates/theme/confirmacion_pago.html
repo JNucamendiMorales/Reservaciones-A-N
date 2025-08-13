@@ -100,14 +100,14 @@
     doc.setFont("helvetica", "bold");
     doc.text("Total pagado:", leftMargin, verticalPos);
     doc.setFont("helvetica", "normal");
-    doc.text(`$${{ total_final|floatformat:2|default:"0.00" }} MXN`, leftMargin + 40, verticalPos);
+    doc.text(`${{ total_final|floatformat:2|default:"0.00" }} MXN`, leftMargin + 40, verticalPos);
 
     {% if descuento_aplicado and descuento_aplicado != "0" %}
       verticalPos += 10;
       doc.setFont("helvetica", "bold");
       doc.text("Descuento aplicado:", leftMargin, verticalPos);
       doc.setFont("helvetica", "normal");
-      doc.text(`$${{ descuento_aplicado|floatformat:2 }} MXN (Código: {{ codigo_ingresado|upper }})`, leftMargin + 60, verticalPos);
+      doc.text(`${{ descuento_aplicado|floatformat:2 }} MXN (Código: {{ codigo_ingresado|upper }})`, leftMargin + 60, verticalPos);
     {% endif %}
 
     verticalPos += 20;
